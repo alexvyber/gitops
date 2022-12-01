@@ -1,17 +1,16 @@
-
 #!/usr/bin/env bash
 
 kubectl get --watch --output-watch-events configmap \
--o=custom-columns=type:type,name:object.metadata.name \
---no-headers | \
-while read next; do                                        #B
+	-o=custom-columns=type:type,name:object.metadata.name \
+	--no-headers |
+	while read next; do #B
 
-    NAME=$(echo $next | cut -d' ' -f2)                     #C
-    EVENT=$(echo $next | cut -d' ' -f1)
+		NAME=$(echo $next | cut -d' ' -f2) #C
+		EVENT=$(echo $next | cut -d' ' -f1)
 
-    case $EVENT in
-        ADDED|MODIFIED)                                    #D
-            kubectl apply -f - << EOF
+		case $EVENT in
+		ADDED | MODIFIED) #D
+			kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata: { name: $NAME }
@@ -35,9 +34,9 @@ spec:
         configMap:
           name: $NAME
 EOF
-            ;;
-        DELETED)                                            #E
-            kubectl delete deploy $NAME
-            ;;
-    esac
-done
+			;;
+		DELETED) #E
+			kubectl delete deploy $NAME
+			;;
+		esac
+	done
